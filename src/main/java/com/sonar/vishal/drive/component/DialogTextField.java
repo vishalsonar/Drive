@@ -13,7 +13,7 @@ public class DialogTextField extends TextField {
 
     public void updateUI(String label) {
         setWidthFull();
-        setMaxLength(100);
+        setMaxLength(20);
         setAutofocus(true);
         setLabel(label);
     }

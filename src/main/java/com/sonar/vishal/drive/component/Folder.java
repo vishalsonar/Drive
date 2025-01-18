@@ -39,7 +39,7 @@ public class Folder extends HorizontalLayout {
 
             if (Files.isDirectory(Path.of(rootFolder))) {
                 Files.list(Path.of(rootFolder)).toList().stream().sorted()
-                        .map(path -> Context.getBean(FolderButton.class).updateUI(path.getFileName().toString()))
+                        .map(path -> Context.getBean(FolderButton.class).updateUI(path))
                         .forEach(this::add);
             }
         } catch (Exception exception) {

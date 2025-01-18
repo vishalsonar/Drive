@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.regex.Pattern;
 
 @UIScope
 @Component
@@ -72,7 +73,9 @@ public class NewFolderDialog extends Dialog {
         try {
             if (Files.isDirectory(Path.of(rootFolder))) {
                 Path newFolder = Path.of(rootFolder + Constant.FOLDER_SLASH + dialogTextField.getValue());
-                if (Files.exists(newFolder)) {
+                if (!Pattern.matches(Constant.FILE_NAME_PATTERN, dialogTextField.getValue())) {
+                    notification.updateUI(Constant.INVALID_FILE_NAME, true);
+                } else if (Files.exists(newFolder)) {
                     notification.updateUI(Constant.FOLDER_CREATE_EXIST_MESSAGE, true);
                 } else {
                     Files.createDirectory(newFolder);
