@@ -23,6 +23,9 @@ public class Folder extends HorizontalLayout {
     private String rootFolder;
 
     @Autowired
+    private Space space;
+
+    @Autowired
     private NewFolderButton newFolderButton;
 
     @Autowired
@@ -39,9 +42,11 @@ public class Folder extends HorizontalLayout {
 
             if (Files.isDirectory(Path.of(rootFolder))) {
                 Files.list(Path.of(rootFolder)).toList().stream().sorted()
+                        .filter(file -> !file.getFileName().toString().contains(Constant.DOT_DS_STORE))
                         .map(path -> Context.getBean(FolderButton.class).updateUI(path))
                         .forEach(this::add);
             }
+            add(space);
         } catch (Exception exception) {
             notification.updateUI(Constant.ERROR_LOADING_PAGE, true);
         }

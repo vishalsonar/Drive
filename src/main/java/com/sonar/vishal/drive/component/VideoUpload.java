@@ -1,5 +1,6 @@
 package com.sonar.vishal.drive.component;
 
+import com.sonar.vishal.drive.context.Context;
 import com.sonar.vishal.drive.util.Constant;
 import com.vaadin.flow.component.upload.SucceededEvent;
 import com.vaadin.flow.component.upload.Upload;
@@ -31,7 +32,7 @@ public class VideoUpload extends Upload {
     }
 
     public VideoUpload updateUI(Path path) {
-        MultiFileMemoryBuffer fileMemoryBuffer = new MultiFileMemoryBuffer();
+        MultiFileMemoryBuffer fileMemoryBuffer = Context.getBean(MultiFileMemoryBuffer.class);
         setReceiver(fileMemoryBuffer);
         addSucceededListener(event -> {
             notification.updateUI(Constant.VIDEO_UPLOAD_SUCCESS_MESSAGE, false);
@@ -43,12 +44,12 @@ public class VideoUpload extends Upload {
     }
 
     public void transferFile(MultiFileMemoryBuffer fileMemoryBuffer, SucceededEvent event, Path path) {
-        File newFile = new File(path.toString() + Constant.FOLDER_SLASH + event.getFileName());
+        File newFile = Context.getBean(File.class, path.toString() + Constant.FOLDER_SLASH + event.getFileName());
         if (newFile.exists()) {
             notification.updateUI(Constant.FILE_CREATE_EXIST_MESSAGE, true);
             return;
         }
-        try (FileOutputStream fileOutputStream = new FileOutputStream(newFile)) {
+        try (FileOutputStream fileOutputStream = Context.getBean(FileOutputStream.class, newFile)) {
             fileMemoryBuffer.getInputStream(event.getFileName()).transferTo(fileOutputStream);
         } catch (Exception exception) {
             notification.updateUI(Constant.VIDEO_UPLOAD_FAILED_MESSAGE, true);
