@@ -1,6 +1,7 @@
 package com.sonar.vishal.drive.component;
 
 import com.sonar.vishal.drive.context.Context;
+import com.sonar.vishal.drive.cryptography.VideoCipher;
 import com.sonar.vishal.drive.util.Constant;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -12,7 +13,9 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Files;
+import javax.crypto.CipherInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
@@ -37,6 +40,9 @@ public class VideoDialog extends Dialog {
     @Autowired
     private Notification notification;
 
+    @Autowired
+    private transient VideoCipher videoCipher;
+
     public VideoDialog() {
         addDetachListener(detachEvent -> ui = null);
         addAttachListener(attachEvent -> ui = attachEvent.getUI());
@@ -56,10 +62,14 @@ public class VideoDialog extends Dialog {
         CompletableFuture.supplyAsync(() -> {
             StringBuilder videoString = Context.getBean(StringBuilder.class);
             videoString.append(Constant.VIDEO_BASE_64_STRING);
-            try {
-                videoString.append(Base64.getEncoder().encodeToString(Files.readAllBytes(path)));
+            try (FileInputStream fileInputStream = new FileInputStream(Context.getBean(File.class, path.toString()));
+                 CipherInputStream cipherInputStream = new CipherInputStream(fileInputStream, videoCipher.getDecryptionCipher())) {
+                videoString.append(Base64.getEncoder().encodeToString(cipherInputStream.readAllBytes()));
             } catch (Exception exception) {
-                ui.access(() -> notification.updateUI(Constant.VIDEO_LOAD_FAILED, true));
+                ui.access(() -> {
+                    notification.updateUI(Constant.VIDEO_LOAD_FAILED, true);
+                    super.close();
+                });
             }
             video.setSrc(videoString.toString());
             ui.access(() -> {

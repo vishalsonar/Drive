@@ -67,11 +67,4 @@ public class Configuration {
         return new NativeLabel();
     }
 
-//    @Bean
-//    @UIScope
-//    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-//
-//    @Bean
-//    @UIScope
-//    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 }

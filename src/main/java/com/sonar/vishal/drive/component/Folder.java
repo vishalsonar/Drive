@@ -1,6 +1,7 @@
 package com.sonar.vishal.drive.component;
 
 import com.sonar.vishal.drive.context.Context;
+import com.sonar.vishal.drive.cryptography.VideoCipher;
 import com.sonar.vishal.drive.util.Constant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.dom.Style;
@@ -26,10 +27,13 @@ public class Folder extends HorizontalLayout {
     private Space space;
 
     @Autowired
+    private Notification notification;
+
+    @Autowired
     private NewFolderButton newFolderButton;
 
     @Autowired
-    private Notification notification;
+    private transient VideoCipher videoCipher;
 
     public Folder open() {
         try {
@@ -37,6 +41,7 @@ public class Folder extends HorizontalLayout {
             setHeightFull();
             setMargin(true);
             setPadding(true);
+            videoCipher.init();
             add(newFolderButton.updateUI());
             getStyle().setFlexWrap(Style.FlexWrap.WRAP);
 

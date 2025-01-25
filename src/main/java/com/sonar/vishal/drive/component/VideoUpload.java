@@ -1,6 +1,7 @@
 package com.sonar.vishal.drive.component;
 
 import com.sonar.vishal.drive.context.Context;
+import com.sonar.vishal.drive.cryptography.VideoCipher;
 import com.sonar.vishal.drive.util.Constant;
 import com.vaadin.flow.component.upload.SucceededEvent;
 import com.vaadin.flow.component.upload.Upload;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.CipherOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Path;
@@ -21,13 +23,16 @@ import java.nio.file.Path;
 public class VideoUpload extends Upload {
 
     @Autowired
+    private VideoCipher videoCipher;
+
+    @Autowired
     private Notification notification;
 
     public VideoUpload() {
         setDropAllowed(true);
         setWidthFull();
         setMaxFiles(1);
-        setMaxFileSize(1024 * 1024 * 1024);
+        setMaxFileSize(100 * 1024 * 1024);
         setAcceptedFileTypes(Constant.ACCEPTED_FILE_TYPE);
     }
 
@@ -49,8 +54,9 @@ public class VideoUpload extends Upload {
             notification.updateUI(Constant.FILE_CREATE_EXIST_MESSAGE, true);
             return;
         }
-        try (FileOutputStream fileOutputStream = Context.getBean(FileOutputStream.class, newFile)) {
-            fileMemoryBuffer.getInputStream(event.getFileName()).transferTo(fileOutputStream);
+        try (FileOutputStream fileOutputStream = Context.getBean(FileOutputStream.class, newFile);
+             CipherOutputStream cipherOutputStream = new CipherOutputStream(fileOutputStream, videoCipher.getEncryptionCipher())) {
+            fileMemoryBuffer.getInputStream(event.getFileName()).transferTo(cipherOutputStream);
         } catch (Exception exception) {
             notification.updateUI(Constant.VIDEO_UPLOAD_FAILED_MESSAGE, true);
         }
