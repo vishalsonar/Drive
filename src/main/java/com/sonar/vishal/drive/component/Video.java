@@ -30,6 +30,6 @@ public class Video extends HtmlContainer {
     public void setStyle() {
         getElement().setProperty(Constant.CONTROLS, true);
         getElement().setProperty(Constant.WIDTH, Constant.THREE_ZERO_ZERO);
-        getElement().setProperty(Constant.HEIGHT, Constant.FOUR_ZERO_ZERO);
+        getElement().setProperty(Constant.HEIGHT, Constant.FIVE_ZERO_ZERO);
     }
 }

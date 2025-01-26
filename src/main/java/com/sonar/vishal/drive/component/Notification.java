@@ -12,9 +12,10 @@ import org.springframework.stereotype.Component;
 public class Notification extends com.vaadin.flow.component.notification.Notification {
 
     public void updateUI(String message, boolean isErrorNotification) {
+        removeThemeNames(NotificationVariant.LUMO_ERROR.getVariantName(), NotificationVariant.LUMO_PRIMARY.getVariantName());
         addThemeVariants(isErrorNotification ? NotificationVariant.LUMO_ERROR : NotificationVariant.LUMO_PRIMARY);
         setPosition(Notification.Position.TOP_END);
-        setDuration(5000);
+        setDuration(4000);
         setText(message);
         open();
     }

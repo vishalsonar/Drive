@@ -7,7 +7,9 @@ public class Constant {
     }
 
     public static final String EMPTY = "";
+    public static final String SRC = "src";
     public static final String BACK = "Back";
+    public static final String VIDEO = "video";
     public static final String DRIVE = "DRIVE";
     public static final String WIDTH = "width";
     public static final String HEIGHT = "height";
@@ -36,14 +38,10 @@ public class Constant {
     public static final String FOLDER_CREATE_SUCCESS_MESSAGE = "Folder Created Successfully";
     public static final String VIDEO_UPLOAD_SUCCESS_MESSAGE = "Video Uploaded Successfully";
     public static final String VIDEO_UPLOAD_FAILED_MESSAGE = "Video Upload Failed";
-    public static final String FAILED_TO_INITIALIZE_APPLICATION = "Failed to initialize application";
-
-    public static final String SRC = "src";
-    public static final String VIDEO = "video";
     public static final String PROCESSING_VIDEO = "Processing video...";
     public static final String GET_HORIZONTAL_LAYOUT = "getHorizontalLayout";
-    public static final String FILE_NAME_PATTERN = "^[a-zA-Z0-9._-]+\\.[a-zA-Z0-9]{1,5}$";
+    public static final String FOLDER_NAME_PATTERN = "^[a-zA-Z0-9._-]+$";
+    public static final String FIVE_ZERO_ZERO = "500";
     public static final String THREE_ZERO_ZERO = "300";
-    public static final String FOUR_ZERO_ZERO = "400";
 
 }

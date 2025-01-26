@@ -1,11 +1,11 @@
 package com.sonar.vishal.drive.component;
 
 import com.sonar.vishal.drive.context.Context;
-import com.sonar.vishal.drive.cryptography.VideoCipher;
 import com.sonar.vishal.drive.util.Constant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.spring.annotation.UIScope;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -24,6 +24,9 @@ public class Folder extends HorizontalLayout {
     private String rootFolder;
 
     @Autowired
+    private transient Logger logger;
+
+    @Autowired
     private Space space;
 
     @Autowired
@@ -32,16 +35,12 @@ public class Folder extends HorizontalLayout {
     @Autowired
     private NewFolderButton newFolderButton;
 
-    @Autowired
-    private transient VideoCipher videoCipher;
-
     public Folder open() {
         try {
             setWidthFull();
             setHeightFull();
             setMargin(true);
             setPadding(true);
-            videoCipher.init();
             add(newFolderButton.updateUI());
             getStyle().setFlexWrap(Style.FlexWrap.WRAP);
 
@@ -54,6 +53,7 @@ public class Folder extends HorizontalLayout {
             add(space);
         } catch (Exception exception) {
             notification.updateUI(Constant.ERROR_LOADING_PAGE, true);
+            logger.error("Failed to load folder :: " + rootFolder, exception);
         }
         return this;
     }

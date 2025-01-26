@@ -8,6 +8,7 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.spring.annotation.UIScope;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -17,6 +18,7 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 @UIScope
 @Component
@@ -29,6 +31,9 @@ public class FolderDialog extends Dialog {
     private Space space;
 
     @Autowired
+    private transient Logger logger;
+
+    @Autowired
     private DialogButton cancelButton;
 
     @Autowired
@@ -37,9 +42,14 @@ public class FolderDialog extends Dialog {
     @Autowired
     private Notification notification;
 
-    public void updateUI(Path path) {
+    public FolderDialog() {
         setWidthFull();
         setHeightFull();
+        setCloseOnEsc(false);
+        setCloseOnOutsideClick(false);
+    }
+
+    public void updateUI(Path path) {
         if (!isDirty) {
             isDirty = true;
             setHeaderTitle(path.getFileName().toString());
@@ -52,11 +62,10 @@ public class FolderDialog extends Dialog {
     }
 
     private void loadVideoButtonList(Path path) {
-        try {
+        try (Stream<Path> pathStream = Files.walk(Paths.get(path.toString()), FileVisitOption.FOLLOW_LINKS)) {
             HorizontalLayout horizontalLayout = Context.getBeansOfType(HorizontalLayout.class).get(Constant.GET_HORIZONTAL_LAYOUT);
             horizontalLayout.add(videoUpload.updateUI(path));
-            Files.walk(Paths.get(path.toString()), FileVisitOption.FOLLOW_LINKS)
-                    .filter(file -> !file.toFile().isDirectory())
+            pathStream.filter(file -> !file.toFile().isDirectory())
                     .filter(file -> !file.getFileName().toString().contains(Constant.DOT_DS_STORE))
                     .map(file -> Context.getBean(VideoButton.class, file))
                     .forEach(horizontalLayout::add);
@@ -67,6 +76,7 @@ public class FolderDialog extends Dialog {
             add(horizontalLayout);
         } catch (Exception exception) {
             notification.updateUI(Constant.VIDEO_LOAD_FAILED, true);
+            logger.error("Failed to load files :: " + path.toString(), exception);
         }
     }
 }

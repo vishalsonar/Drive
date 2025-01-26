@@ -19,8 +19,8 @@ public class VideoButton extends Button {
     public VideoButton(Path path) {
         setText(path.getFileName().toString());
         setIcon(VaadinIcon.FILE_MOVIE.create());
-        setWidth(30, Unit.PERCENTAGE);
-        setHeight(30, Unit.PERCENTAGE);
+        setWidth(15, Unit.PERCENTAGE);
+        setHeight(15, Unit.PERCENTAGE);
         addClickListener(event -> Context.getBean(VideoDialog.class).open(path));
     }
 }
