@@ -1,41 +1,67 @@
 buildscript {
     repositories {
-    	mavenCentral()
-	    maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
-			maven { setUrl("https://repo.spring.io/milestone") }
-		}
-}
-plugins {
-	id 'org.springframework.boot' version '3.1.5'
-	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
-	id 'java'
-	id 'com.vaadin'
+        mavenCentral()
+        maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
+        maven { setUrl("https://repo.spring.io/milestone") }
+    }
+    ext {
+        def applicationProperties = new Properties()
+        file("src/main/resources/application.properties").withInputStream { applicationProperties.load(it) }
+        project.setVersion(applicationProperties.get("application.version"))
+        productionMode = applicationProperties.get("application.build.productionMode").toString().toBoolean()
+    }
 }
 
+plugins {
+    id 'org.springframework.boot' version '3.1.5'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id 'java'
+    id 'com.vaadin'
+    id 'com.google.cloud.tools.jib' version '3.4.4'
+}
+
+sourceCompatibility = 18
+targetCompatibility = 18
+archivesBaseName = 'drive'
+group = 'com.sonar.vishal'
+
 repositories {
-	mavenCentral()
-	maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
-	maven { setUrl("https://repo.spring.io/milestone") }
-	maven { setUrl("https://maven.vaadin.com/vaadin-addons") }
+    mavenCentral()
+    maven { setUrl("https://maven.vaadin.com/vaadin-prereleases") }
+    maven { setUrl("https://repo.spring.io/milestone") }
+    maven { setUrl("https://maven.vaadin.com/vaadin-addons") }
 }
 
 configurations {
-	developmentOnly
-	runtimeClasspath {
-		extendsFrom developmentOnly
-	}
+    developmentOnly
+    runtimeClasspath {
+        extendsFrom developmentOnly
+    }
 }
 
 dependencies {
-	implementation('com.vaadin:vaadin-spring-boot-starter')
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	}
+    implementation('com.vaadin:vaadin-spring-boot-starter')
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
 }
 
 dependencyManagement {
-	imports {
-		mavenBom "com.vaadin:vaadin-bom:$vaadinVersion"
-	}
+    imports {
+        mavenBom "com.vaadin:vaadin-bom:$vaadinVersion"
+    }
+}
+
+vaadin.productionMode = ext.productionMode
+vaadin.generateBundle = ext.productionMode
+vaadin.optimizeBundle = ext.productionMode
+tasks.jib.dependsOn build
+
+tasks {
+    jib {
+        to {
+            image 'registry.hub.docker.com/vishalsonar/drive'
+        }
+    }
 }

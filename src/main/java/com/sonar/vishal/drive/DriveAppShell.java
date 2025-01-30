@@ -6,7 +6,7 @@ import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.shared.communication.PushMode;
 import com.vaadin.flow.theme.Theme;
 
-@PWA(name = "Project Base for Vaadin", shortName = "Project Base")
+@PWA(name = "Drive", shortName = "Drive")
 @Theme("my-theme")
 @Push(value = PushMode.AUTOMATIC)
 public class DriveAppShell implements AppShellConfigurator {

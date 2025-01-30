@@ -28,7 +28,7 @@ public class NewFolderDialog extends Dialog {
     private UI ui;
     private boolean isDirty;
 
-    @Value("${spring.drive.root.folder}")
+    @Value("${drive.root.folder}")
     private String rootFolder;
 
     @Autowired
@@ -91,6 +91,8 @@ public class NewFolderDialog extends Dialog {
                     Files.createDirectory(newFolder);
                     pushFolder(newFolder);
                 }
+            } else {
+                notification.updateUI(Constant.ROOT_FOLDER_NOT_FOUND, true);
             }
         } catch (Exception exception) {
             notification.updateUI(Constant.FOLDER_CREATE_FAILED_MESSAGE, true);

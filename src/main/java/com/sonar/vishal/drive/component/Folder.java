@@ -20,7 +20,7 @@ import java.nio.file.Path;
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class Folder extends HorizontalLayout {
 
-    @Value("${spring.drive.root.folder}")
+    @Value("${drive.root.folder}")
     private String rootFolder;
 
     @Autowired

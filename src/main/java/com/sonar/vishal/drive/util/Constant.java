@@ -36,6 +36,7 @@ public class Constant {
     public static final String FOLDER_CREATE_EXIST_MESSAGE = "Folder Already Exist";
     public static final String FOLDER_CREATE_FAILED_MESSAGE = "Failed to Create Folder";
     public static final String FOLDER_CREATE_SUCCESS_MESSAGE = "Folder Created Successfully";
+    public static final String ROOT_FOLDER_NOT_FOUND = "Unable to locate or create Root Folder";
     public static final String VIDEO_UPLOAD_SUCCESS_MESSAGE = "Video Uploaded Successfully";
     public static final String VIDEO_UPLOAD_FAILED_MESSAGE = "Video Upload Failed";
     public static final String PROCESSING_VIDEO = "Processing video...";
