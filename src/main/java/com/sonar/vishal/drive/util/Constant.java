@@ -33,9 +33,12 @@ public class Constant {
     public static final String INVALID_FILE_NAME = "Invalid File Name";
     public static final String ERROR_LOADING_PAGE = "Enable to load page";
     public static final String VIDEO_IMAGE_LOAD_FAILED = "Failed to load video/image";
+    public static final String VIDEO_LOAD_FAILED = "Failed to load video";
+    public static final String IMAGE_LOAD_FAILED = "Failed to load image";
     public static final String VIDEO_BASE_64_STRING = "data:video/mp4;base64,";
     public static final String IMAGE_BASE_64_STRING = "data:image/png;base64,";
     public static final String FILE_CREATE_EXIST_MESSAGE = "File Already Exist";
+    public static final String FILE_REJECT_ERROR_MESSAGE = "File size exceeds 500MB";
     public static final String FOLDER_CREATE_EXIST_MESSAGE = "Folder Already Exist";
     public static final String FOLDER_CREATE_FAILED_MESSAGE = "Failed to Create Folder";
     public static final String FOLDER_CREATE_SUCCESS_MESSAGE = "Folder Created Successfully";
@@ -50,4 +53,5 @@ public class Constant {
     public static final String THREE_ZERO_ZERO = "300";
     public static final String LABEL_DROP_HERE = "Drop Video/Image here";
     public static final String BUTTON_DROP_HERE = "Upload Video/Image...";
+    public static final String VIDEO_HOST_PATH = "/videos/stream/";
 }

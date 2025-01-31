@@ -40,7 +40,7 @@ public class VideoImageUpload extends Upload {
         setWidthFull();
         setMaxFiles(1);
         setDropAllowed(true);
-        setMaxFileSize(100 * 1024 * 1024);
+        setMaxFileSize(500 * 1024 * 1024);
         setHeight(25, Unit.PERCENTAGE);
         setDropLabel(Context.getBean(DropLabelSpan.class));
         setUploadButton(Context.getBean(UploadButton.class));
@@ -51,6 +51,7 @@ public class VideoImageUpload extends Upload {
         MultiFileMemoryBuffer fileMemoryBuffer = Context.getBean(MultiFileMemoryBuffer.class);
         setReceiver(fileMemoryBuffer);
         addSucceededListener(event -> transferFile(fileMemoryBuffer, event, path));
+        addFileRejectedListener(fileRejectedEvent -> notification.updateUI(Constant.FILE_REJECT_ERROR_MESSAGE, true));
         return this;
     }
 

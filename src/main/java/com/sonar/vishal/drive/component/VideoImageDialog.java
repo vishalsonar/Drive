@@ -12,6 +12,7 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.spring.annotation.UIScope;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,9 @@ import org.springframework.stereotype.Component;
 import javax.crypto.CipherInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
@@ -30,7 +34,12 @@ import java.util.regex.Pattern;
 public class VideoImageDialog extends Dialog {
 
     private UI ui;
+    private boolean isOpen;
     private boolean isDirty;
+    private String tempVideoPath;
+
+    @Value("${drive.stream.folder}")
+    private String streamFolder;
 
     @Autowired
     private Image image;
@@ -71,35 +80,88 @@ public class VideoImageDialog extends Dialog {
             convertToVideoImage(path);
             cancelButton.updateUI(Constant.BACK, VaadinIcon.ARROW_CIRCLE_LEFT, event -> close());
             cancelButton.setWidth(60, Unit.PERCENTAGE);
+            addDetachListener(detachEvent -> close());
             getFooter().add(cancelButton);
         }
+        isOpen = true;
         super.open();
     }
 
-    public void convertToVideoImage(Path path) {
+    @Override
+    public void close() {
+        if (isOpen) {
+            isOpen = false;
+            deleteFile();
+            super.close();
+        }
+    }
+
+    private void convertToVideoImage(Path path) {
         CompletableFuture.supplyAsync(() -> {
-            StringBuilder videoImageString = Context.getBean(StringBuilder.class);
-            final boolean isVideo = !Pattern.matches(Constant.IMAGE_NAME_PATTERN, path.getFileName().toString());
-            videoImageString.append(isVideo ? Constant.VIDEO_BASE_64_STRING : Constant.IMAGE_BASE_64_STRING);
-            try (FileInputStream fileInputStream = Context.getBean(FileInputStream.class, Context.getBean(File.class, path.toString()));
-                 CipherInputStream cipherInputStream = Context.getBean(CipherInputStream.class, fileInputStream, videoCipher.getDecryptionCipher())) {
-                videoImageString.append(Base64.getEncoder().encodeToString(cipherInputStream.readAllBytes()));
-            } catch (Exception exception) {
-                ui.access(() -> {
-                    notification.updateUI(Constant.VIDEO_IMAGE_LOAD_FAILED, true);
-                    super.close();
-                });
-                logger.error("Failed to decrypt video/image", exception);
+            final boolean isImage = Pattern.matches(Constant.IMAGE_NAME_PATTERN, path.getFileName().toString());
+            if (isImage) {
+                pushImage(path);
+            } else {
+                pushVideo(path);
             }
-            video.setSrc(videoImageString.toString());
-            image.setSrc(videoImageString.toString());
-            ui.access(() -> {
-                removeAll();
-                if (isVideo) add(video);
-                else add(image);
-                cancelButton.setWidth(30, Unit.PERCENTAGE);
-            });
             return Constant.EMPTY;
         });
+    }
+
+    private void pushImage(Path path) {
+        StringBuilder imageString = Context.getBean(StringBuilder.class);
+        imageString.append(Constant.IMAGE_BASE_64_STRING);
+        try (FileInputStream fileInputStream = Context.getBean(FileInputStream.class, Context.getBean(File.class, path.toString()));
+             CipherInputStream cipherInputStream = Context.getBean(CipherInputStream.class, fileInputStream, videoCipher.getDecryptionCipher())) {
+            imageString.append(Base64.getEncoder().encodeToString(cipherInputStream.readAllBytes()));
+            image.setSrc(imageString.toString());
+            pushComponent(image);
+        } catch (Exception exception) {
+            pushException(Constant.IMAGE_LOAD_FAILED, "Failed to decrypt image", exception);
+        }
+    }
+
+    private void pushVideo(Path path) {
+        StringBuilder videoPath = Context.getBean(StringBuilder.class);
+        videoPath.append(streamFolder);
+        videoPath.append(Constant.FOLDER_SLASH);
+        videoPath.append(path.getFileName().toString());
+        tempVideoPath = videoPath.toString();
+        try (FileInputStream fileInputStream = Context.getBean(FileInputStream.class, Context.getBean(File.class, path.toString()));
+             FileOutputStream fileOutputStream = Context.getBean(FileOutputStream.class, Context.getBean(File.class, tempVideoPath));
+             CipherInputStream cipherInputStream = Context.getBean(CipherInputStream.class, fileInputStream, videoCipher.getDecryptionCipher())) {
+            cipherInputStream.transferTo(fileOutputStream);
+            video.setSrc(Constant.VIDEO_HOST_PATH + path.getFileName().toString());
+            pushComponent(video);
+        } catch (Exception exception) {
+            pushException(Constant.VIDEO_LOAD_FAILED, "Failed to decrypt video", exception);
+            deleteFile();
+        }
+    }
+
+    private void deleteFile() {
+        if (tempVideoPath != null) {
+            try {
+                Files.deleteIfExists(Context.getBean(File.class, tempVideoPath).toPath());
+            } catch (IOException ioException) {
+                logger.error("Filed to delete file", ioException);
+            }
+        }
+    }
+
+    private void pushComponent(com.vaadin.flow.component.Component component) {
+        ui.access(() -> {
+            removeAll();
+            add(component);
+            cancelButton.setWidth(30, Unit.PERCENTAGE);
+        });
+    }
+
+    private void pushException(String notificationMessage, String logMessage, Exception exception) {
+        ui.access(() -> {
+            notification.updateUI(notificationMessage, true);
+            super.close();
+        });
+        logger.error(logMessage, exception);
     }
 }
