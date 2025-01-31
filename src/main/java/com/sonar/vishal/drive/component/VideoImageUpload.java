@@ -25,7 +25,7 @@ import java.nio.file.Path;
 @UIScope
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class VideoUpload extends Upload {
+public class VideoImageUpload extends Upload {
 
     @Autowired
     private transient Logger logger;
@@ -36,16 +36,18 @@ public class VideoUpload extends Upload {
     @Autowired
     private Notification notification;
 
-    public VideoUpload() {
+    public VideoImageUpload() {
         setWidthFull();
         setMaxFiles(1);
         setDropAllowed(true);
         setMaxFileSize(100 * 1024 * 1024);
         setHeight(25, Unit.PERCENTAGE);
-        setAcceptedFileTypes(Constant.ACCEPTED_FILE_TYPE);
+        setDropLabel(Context.getBean(DropLabelSpan.class));
+        setUploadButton(Context.getBean(UploadButton.class));
+        setAcceptedFileTypes(Constant.ACCEPTED_VIDEO_FILE_TYPE, Constant.ACCEPTED_IMAGE_FILE_TYPE);
     }
 
-    public VideoUpload updateUI(Path path) {
+    public VideoImageUpload updateUI(Path path) {
         MultiFileMemoryBuffer fileMemoryBuffer = Context.getBean(MultiFileMemoryBuffer.class);
         setReceiver(fileMemoryBuffer);
         addSucceededListener(event -> transferFile(fileMemoryBuffer, event, path));
@@ -65,16 +67,16 @@ public class VideoUpload extends Upload {
         try (FileOutputStream fileOutputStream = Context.getBean(FileOutputStream.class, file);
              CipherOutputStream cipherOutputStream = Context.getBean(CipherOutputStream.class, fileOutputStream, videoCipher.getEncryptionCipher())) {
             fileMemoryBuffer.getInputStream(file.getName()).transferTo(cipherOutputStream);
-            notification.updateUI(Constant.VIDEO_UPLOAD_SUCCESS_MESSAGE, false);
-            pushVideoButton(file, event);
+            notification.updateUI(Constant.VIDEO_IMAGE_UPLOAD_SUCCESS_MESSAGE, false);
+            pushVideoImageButton(file, event);
         } catch (Exception exception) {
             deleteFile(file);
-            notification.updateUI(Constant.VIDEO_UPLOAD_FAILED_MESSAGE, true);
-            logger.error("Failed to encrypt video", exception);
+            notification.updateUI(Constant.VIDEO_IMAGE_UPLOAD_FAILED_MESSAGE, true);
+            logger.error("Failed to encrypt video/image", exception);
         }
     }
 
-    private void pushVideoButton(File file, SucceededEvent event) {
+    private void pushVideoImageButton(File file, SucceededEvent event) {
         event.getSource().getParent().ifPresent(component -> {
             HorizontalLayout horizontalLayout = (HorizontalLayout) component;
             component.getUI().get().access(() -> horizontalLayout.addComponentAtIndex(1, Context.getBean(VideoButton.class, file.toPath())));

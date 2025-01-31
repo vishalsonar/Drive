@@ -37,7 +37,7 @@ public class FolderDialog extends Dialog {
     private DialogButton cancelButton;
 
     @Autowired
-    private VideoUpload videoUpload;
+    private VideoImageUpload videoImageUpload;
 
     @Autowired
     private Notification notification;
@@ -53,7 +53,7 @@ public class FolderDialog extends Dialog {
         if (!isDirty) {
             isDirty = true;
             setHeaderTitle(path.getFileName().toString());
-            loadVideoButtonList(path);
+            loadVideoImageButtonList(path);
             cancelButton.updateUI(Constant.BACK, VaadinIcon.ARROW_CIRCLE_LEFT, event -> close());
             cancelButton.setWidth(15, Unit.PERCENTAGE);
             getFooter().add(cancelButton);
@@ -61,10 +61,10 @@ public class FolderDialog extends Dialog {
         open();
     }
 
-    private void loadVideoButtonList(Path path) {
+    private void loadVideoImageButtonList(Path path) {
         try (Stream<Path> pathStream = Files.walk(Paths.get(path.toString()), FileVisitOption.FOLLOW_LINKS)) {
             HorizontalLayout horizontalLayout = Context.getBeansOfType(HorizontalLayout.class).get(Constant.GET_HORIZONTAL_LAYOUT);
-            horizontalLayout.add(videoUpload.updateUI(path));
+            horizontalLayout.add(videoImageUpload.updateUI(path));
             pathStream.filter(file -> !file.toFile().isDirectory())
                     .filter(file -> !file.getFileName().toString().contains(Constant.DOT_DS_STORE))
                     .map(file -> Context.getBean(VideoButton.class, file))
@@ -75,7 +75,7 @@ public class FolderDialog extends Dialog {
             horizontalLayout.getStyle().setFlexWrap(Style.FlexWrap.WRAP);
             add(horizontalLayout);
         } catch (Exception exception) {
-            notification.updateUI(Constant.VIDEO_LOAD_FAILED, true);
+            notification.updateUI(Constant.VIDEO_IMAGE_LOAD_FAILED, true);
             logger.error("Failed to load files :: " + path.toString(), exception);
         }
     }

@@ -22,14 +22,18 @@ import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.util.Base64;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 
 @UIScope
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class VideoDialog extends Dialog {
+public class VideoImageDialog extends Dialog {
 
     private UI ui;
     private boolean isDirty;
+
+    @Autowired
+    private Image image;
 
     @Autowired
     private Video video;
@@ -52,7 +56,7 @@ public class VideoDialog extends Dialog {
     @Autowired
     private transient VideoCipher videoCipher;
 
-    public VideoDialog() {
+    public VideoImageDialog() {
         setCloseOnEsc(false);
         setCloseOnOutsideClick(false);
         addDetachListener(detachEvent -> ui = null);
@@ -62,9 +66,9 @@ public class VideoDialog extends Dialog {
     public void open(Path path) {
         if (!isDirty) {
             isDirty = true;
-            progressBarLabel.setText(Constant.PROCESSING_VIDEO);
+            progressBarLabel.setText(Constant.PROCESSING_VIDEO_IMAGE);
             add(progressBarLabel, progressBar);
-            convertToVideo(path);
+            convertToVideoImage(path);
             cancelButton.updateUI(Constant.BACK, VaadinIcon.ARROW_CIRCLE_LEFT, event -> close());
             cancelButton.setWidth(60, Unit.PERCENTAGE);
             getFooter().add(cancelButton);
@@ -72,24 +76,27 @@ public class VideoDialog extends Dialog {
         super.open();
     }
 
-    public void convertToVideo(Path path) {
+    public void convertToVideoImage(Path path) {
         CompletableFuture.supplyAsync(() -> {
-            StringBuilder videoString = Context.getBean(StringBuilder.class);
-            videoString.append(Constant.VIDEO_BASE_64_STRING);
+            StringBuilder videoImageString = Context.getBean(StringBuilder.class);
+            final boolean isVideo = !Pattern.matches(Constant.IMAGE_NAME_PATTERN, path.getFileName().toString());
+            videoImageString.append(isVideo ? Constant.VIDEO_BASE_64_STRING : Constant.IMAGE_BASE_64_STRING);
             try (FileInputStream fileInputStream = Context.getBean(FileInputStream.class, Context.getBean(File.class, path.toString()));
                  CipherInputStream cipherInputStream = Context.getBean(CipherInputStream.class, fileInputStream, videoCipher.getDecryptionCipher())) {
-                videoString.append(Base64.getEncoder().encodeToString(cipherInputStream.readAllBytes()));
+                videoImageString.append(Base64.getEncoder().encodeToString(cipherInputStream.readAllBytes()));
             } catch (Exception exception) {
                 ui.access(() -> {
-                    notification.updateUI(Constant.VIDEO_LOAD_FAILED, true);
+                    notification.updateUI(Constant.VIDEO_IMAGE_LOAD_FAILED, true);
                     super.close();
                 });
-                logger.error("Failed to decrypt video", exception);
+                logger.error("Failed to decrypt video/image", exception);
             }
-            video.setSrc(videoString.toString());
+            video.setSrc(videoImageString.toString());
+            image.setSrc(videoImageString.toString());
             ui.access(() -> {
                 removeAll();
-                add(video);
+                if (isVideo) add(video);
+                else add(image);
                 cancelButton.setWidth(30, Unit.PERCENTAGE);
             });
             return Constant.EMPTY;
