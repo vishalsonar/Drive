@@ -54,4 +54,8 @@ public class Constant {
     public static final String LABEL_DROP_HERE = "Drop Video/Image here";
     public static final String BUTTON_DROP_HERE = "Upload Video/Image...";
     public static final String VIDEO_HOST_PATH = "/videos/stream/";
+    public static final String PASSWORD_LABEL = "Password";
+    public static final String PASSWORD_HELPER_TEXT = "Password required to proceed. Press Enter to continue.";
+    public static final String PASSWORD_INVALID_ERROR = "Invalid password. Please try again.";
+    public static final String SHA_256 = "SHA-256";
 }
