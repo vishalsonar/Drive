@@ -11,6 +11,7 @@ import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
+import org.springframework.core.io.ByteArrayResource;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -132,5 +133,19 @@ public class Configuration {
     @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public GCMParameterSpec getGCMParameterSpec(int tLen, byte[] src) {
         return new GCMParameterSpec(tLen, src);
+    }
+
+    @Bean
+    @UIScope
+    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public ByteArrayResource getByteArrayResource(byte[] byteArray) {
+        return new ByteArrayResource(byteArray);
+    }
+
+    @Bean
+    @UIScope
+    @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    public byte[] getByte() {
+        return new byte[0];
     }
 }

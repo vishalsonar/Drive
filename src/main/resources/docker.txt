@@ -1,0 +1,4 @@
+
+# Docker Command to create container
+docker run -d -p 9080:9080 --name 'drive' -v /Users/vishalsonar/Downloads/Drive/log:/Users/drive/log:rw -v /Users/vishalsonar/Downloads/Drive/data:/Users/drive/data:rw vishalsonar/drive
+
